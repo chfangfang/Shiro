@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chxf.user.mapper.RoleMapper" >
+
+    <!-- 查询所有的角色信息 -->
+    <select id="selectRoleList" resultType="SysRole">
+        select * from sys_role;
+    </select>
+
+    <!-- 添加角色信息 -->
+    <insert id="insertRole" parameterType="SysRole">
+        insert into
+        sys_role(id,rolename,islocked,createtime,roledesc)
+        values(#{id},#{rolename},#{islocked},#{createtime},#{roledesc});
+    </insert>
+
+    <!-- 根据角色的唯一标志删除角色信息 -->
+    <delete id="deleteRoleById" parameterType="String">
+        delete from sys_role where id = #{id};
+    </delete>
+
+    <!-- 根据角色唯一标志查询角色信息 -->
+    <select id="selectRoleById" resultType="SysRole" parameterType="String">
+        select * from sys_role where id = #{id};
+    </select>
+
+    <!-- 根据角色唯一标志修改角色信息 -->
+    <update id="updateRoleById" parameterType="SysRole">
+        update sys_role set rolename = #{rolename},islocked = #{islocked},roledesc = #{roledesc} where id = #{id};
+    </update>
+
+    <!-- 根据角色唯一标志查询角色名称 -->
+    <select id="selectRoleNameById" parameterType="String" resultType="String">
+        select rolename from sys_role where id = #{id};
+    </select>
+
+</mapper>

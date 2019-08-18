@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!-- 1.配置数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxPoolSize" value="30"/>
+        <property name="minPoolSize" value="2"/>
+    </bean>
+
+    <!-- 2.配置sessionFactory===mybatis -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 配置别名   如:com.chxf.one.model-->
+        <property name="typeAliasesPackage" value="com.chxf.user.model"></property><!--model包-->
+        <!-- 配置加载的mapper映射文件   -->
+        <property name="mapperLocations" value="classpath:com/chxf/user/mapper/*Mapper.xml"></property>
+    </bean>
+
+    <!-- 3.自动生成dao,mapper-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- com.chxf.one.mapper -->
+        <property name="basePackage" value="com.chxf.user.mapper"/><!--mapper包-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+    </bean>
+
+    <!--4.\\7自动扫描Service-->
+    <context:component-scan base-package="com.chxf.user.service"/><!--service包-->
+
+    <!-- 配置事务-->
+    <!-- 5.配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 6.开启事务注解-->
+    <tx:annotation-driven></tx:annotation-driven>
+
+    <!-- 7.1:配置Shiro 的Web过滤器 start-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <!-- loginUrl认证提交地址，如果没有认证将会请求此地址进行认证，请求此地址将由formAuthenticationFilter进行表单认证 -->
+        <property name="loginUrl" value="/login.do"/>
+        <!-- 认证成功后统一跳转到first.action,建议不配置,因shiro认证成功后会自动跳转到上一个请求路径-->
+        <property name="successUrl" value="/index.do" />
+        <!-- 指定无权限的访问页面 -->
+        <property name="unauthorizedUrl" value="/refuse.jsp"/>
+
+        <!-- 过虑器链定义，从上向下顺序执行，一般将/**放在最下边 -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!-- 过滤器从上向下顺序执行 -->
+                <!-- 对静态资源设置匿名访问 -->
+                /images/** = anon
+                /js/** = anon
+                /css/** = anon
+                /favicon.ico = anon
+                <!--请求login.action地址,shiro清除session-->
+                /logout.do = logout
+                <!--商品查询权限-->
+                <!--/item/editItem.action = perms[item:update]-->
+                <!--/item/edit.action = perms[item:add]-->
+                <!-- 所用的url必须都认证通过后才可访问 -->
+                /** = authc
+            </value>
+        </property>
+    </bean>
+
+    <!-- 7.2:安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="userRealm"/>
+        <!--缓存器-->
+        <property name="cacheManager" ref="cacheManager"></property>
+        <!-- 注入session管理器 -->
+        <property name="sessionManager" ref="sessionManager"></property>
+    </bean>
+
+    <!-- 7.3:自定义 realm -->
+    <bean id="userRealm" class="com.chxf.user.realm.MyRealm">
+        <!-- 将凭证匹配器设置到realm中 -->
+        <property name="credentialsMatcher" ref="credentialsMatcher">
+        </property>
+    </bean>
+
+    <!-- 7.4:定义凭证匹配器 -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="md5"></property>
+        <property name="hashIterations" value="1024"></property>
+    </bean>
+    <!-- 7.5:缓存管理器 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:shiro-ehcache.xml"></property>
+    </bean>
+    <!-- 7.6:session管理 -->
+    <!-- 会话管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!-- session的失效时长，单位毫秒 -->
+        <property name="globalSessionTimeout" value="600000"/>
+        <!-- 删除失效的session -->
+        <property name="deleteInvalidSessions" value="true"/>
+    </bean>
+
+</beans>

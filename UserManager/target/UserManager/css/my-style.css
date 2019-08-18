@@ -1,0 +1,32 @@
+.state_class {
+    display: inline-block;
+    font-weight: bold;
+    width: 45px;
+    height: 25px;
+    font-size: 15px;
+    line-height: 25px;
+    font-family: 楷体;
+    color: #FFFFFF;
+    border-radius: 5px;
+}
+
+.state_ok {
+    background: #00aa00;
+}
+
+.state_no {
+    background: #cc0001;
+}
+
+.permissiom_class {
+    width: 25%;
+    float: left;
+    line-height: 30px;
+    padding-left: 10px;
+}
+
+.permissiom_span {
+    display: inline-block;
+    margin-right: 15px;
+    width: 100%;
+}

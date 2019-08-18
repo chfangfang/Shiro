@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chxf.user.mapper.LogMapper" >
+
+    <!-- 查询所有的角色信息 -->
+    <select id="selectLogList" resultType="SysLog">
+        select * from sys_log order by id desc;
+    </select>
+
+    <!-- 添加角色信息 -->
+    <insert id="insertLog" parameterType="SysLog">
+        insert into sys_log(
+        id,logname,username,addressip,permcode,methed,logtime)
+        values (#{id},#{logname},#{username},#{addressip},#{permcode},#{methed},#{logtime});
+    </insert>
+
+</mapper>

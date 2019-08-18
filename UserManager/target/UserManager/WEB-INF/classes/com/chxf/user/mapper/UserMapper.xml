@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chxf.user.mapper.UserMappper" >
+    <!--
+    <select id="findById" resultType="user" parameterType="int">
+        SELECT * FROM t_user WHERE id = #{id}
+    </select>
+    -->
+    <!---->
+    <select id="selectAllUser" resultType="SysUser" >
+        select * from sys_user;
+    </select>
+
+    <!-- 插入用户信息 -->
+    <insert id="insertUser"  parameterType="SysUser">
+        insert into
+        sys_user(id,username,password,islocked,userdesc,salt,createtime)
+        values (#{id},#{username},#{password},#{islocked},#{userdesc},#{salt},#{createtime});
+    </insert>
+
+    <!-- 根据用户id查询用户信息 -->
+    <select id="selectUserById" parameterType="String" resultType="SysUserVO">
+        select * from sys_user where id = #{id};
+    </select>
+
+    <!-- 修改用户的基本信息 -->
+    <update id="updateUser" parameterType="SysUserVO">
+        update sys_user set islocked = #{islocked},userdesc = #{userdesc} where id = #{id};
+    </update>
+
+    <!-- 根据用户唯一标志删除用户 -->
+    <delete id="deleteUserById" parameterType="String" >
+        delete from sys_user where id = #{id};
+    </delete>
+
+    <!-- 根据用户唯一标志查询用户名 -->
+    <select id="selectUserNameById" parameterType="String" resultType="String">
+        select username from sys_user where id = #{id};
+    </select>
+
+    <!-- 根据用户名称获取用户信息-->
+    <select id="selectUserByName" parameterType="String" resultType="SysUser">
+        select * from sys_user where username = #{username};
+    </select>
+
+    <!-- 获取用户的角色 -->
+    <select id="selectRoleName" parameterType="String" resultType="SysRole">
+        select * from sys_role where id = (select roleid from sys_user_role where userid = #{id});
+    </select>
+</mapper>
+

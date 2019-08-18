@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chxf.user.mapper.PermissionMapper" >
+
+    <!-- 查询所有的角色信息 -->
+    <select id="selectAllPermission" resultType="SysPermission">
+        select * from sys_permission order by  permtype desc ,permcode desc;
+    </select>
+
+    <!-- 添加角色信息 -->
+    <insert id="insertPermission" parameterType="SysPermission">
+        insert into
+        sys_permission(id,permname,permtype,permurl,
+            permcode,permdesc,parentid,islocked,createtime)
+        values(#{id},#{permname},#{permtype},#{permurl},
+            #{permcode},#{permdesc},#{parentid},#{islocked},#{createtime});
+    </insert>
+
+    <!-- 根据唯一标志删除角色信息 -->
+    <delete id="deletePermissionById" parameterType="String">
+        delete from sys_permission where id = #{id};
+    </delete>
+
+    <!-- 根据用户信息获取角色信息 -->
+    <select id="selectPermissionById" parameterType="String" resultType="SysPermission">
+        select * from sys_permission where id = #{id};
+    </select>
+
+    <!-- 根据用户信息修改角色信息 -->
+    <update id="updatePermissionById" parameterType="SysPermission">
+        update sys_permission set
+            permname = #{permname}, permurl = #{permurl}, permtype = #{permtype}, parentid = #{parentid}, permcode = #{permcode},islocked = #{islocked}, permdesc = #{permdesc}
+        where id = #{id};
+    </update>
+
+    <!-- 查询所有未添加的角色信息 -->
+    <select id="selectPermissionName" resultType="SysPermissionVO" parameterType="String">
+        select * from sys_permission where id not in (select permid from sys_role_permission where roleid = #{id}) order by  permtype desc ,permcode desc;
+    </select>
+
+    <!-- 查询所有已添加的角色信息 -->
+    <select id="selectOldPermissionById" resultType="SysPermissionVO" parameterType="String">
+        select * from sys_permission where id in (select permid from sys_role_permission where roleid = #{id}) order by  permtype desc ,permcode desc;
+    </select>
+
+    <!-- 根据用户id查询该用户具有的菜单项 -->
+    <select id="findMenuByUserId" parameterType="String" resultType="SysPermission">
+        select * from sys_permission where permtype = "菜单" and id in
+          (select permid from sys_role_permission where roleid in
+            (select roleid from sys_user_role where userid = #{id}
+            )
+          )
+        ;
+    </select>
+
+    <!-- 根据用户id查询该用户具有的权限项 -->
+    <select id="findPermissionByUserId" parameterType="String" resultType="SysPermission">
+        select * from sys_permission where id in
+          (select permid from sys_role_permission where roleid in
+            (select roleid from sys_user_role where userid = #{id}
+            )
+          )
+        ;
+    </select>
+</mapper>
